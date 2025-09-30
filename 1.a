@@ -1,0 +1,35 @@
+features_1a = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking']
+X_1a_raw = df[features_1a].values
+
+# Split data (80/20)
+X_train_raw_1a, X_test_raw_1a, y_train_1a, y_test_1a = train_test_split(
+    X_1a_raw, y_full, test_size=0.2, random_state=42
+)
+
+# Add Bias Term (NO scaling)
+X_train_1a = np.hstack((np.ones((X_train_raw_1a.shape[0], 1)), X_train_raw_1a))
+X_test_1a = np.hstack((np.ones((X_test_raw_1a.shape[0], 1)), X_test_raw_1a))
+
+# Initialize Parameters
+initial_theta_1a = np.zeros(X_train_1a.shape[1])
+
+# Run Gradient Descent
+best_theta_1a, train_loss_hist_1a, val_loss_hist_1a = gradient_descent(
+    X_train_1a, y_train_1a, initial_theta_1a, ALPHA_BASE, ITERATIONS_BASE,
+    X_test_1a, y_test_1a
+)
+
+# Final Evaluation
+final_train_loss_1a = compute_loss(X_train_1a, y_train_1a, best_theta_1a)
+final_validation_loss_1a = compute_loss(X_test_1a, y_test_1a, best_theta_1a)
+
+print("--- Problem 1.a Results (Baseline, 5 Features) ---")
+print(f"Features: {features_1a}")
+print(f"Best Parameters (theta): {best_theta_1a}")
+print(f"Final Train Loss (MSE): {final_train_loss_1a:.2f}")
+print(f"Final Validation Loss (MSE): {final_validation_loss_1a:.2f}")
+
+# Plotting
+plot_loss(train_loss_hist_1a, val_loss_hist_1a,
+          "1.a) Training and Validation Loss (Baseline, 5 Features)",
+          ALPHA_BASE, ITERATIONS_BASE)
