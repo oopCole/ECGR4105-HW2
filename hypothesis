@@ -1,0 +1,97 @@
+# --- Core Linear Regression Functions ---
+
+def hypothesis(X, theta):
+    """Calculates the predicted price: X * theta."""
+    return X @ theta
+
+def compute_loss(X, y, theta):
+    """Computes the Mean Squared Error (MSE) loss: J(theta) = 1/(2m) * sum((h(x) - y)^2)"""
+    m = len(y)
+    predictions = hypothesis(X, theta)
+    errors = predictions - y
+    loss = (1 / (2 * m)) * np.sum(errors**2)
+    return loss
+
+def gradient_descent(X, y, theta, alpha, iterations, X_val=None, y_val=None):
+    """Performs standard gradient descent."""
+    m = len(y)
+    train_loss_history = []
+    validation_loss_history = []
+    
+    current_theta = theta.copy()
+    
+    for i in range(iterations):
+        predictions = hypothesis(X, current_theta)
+        errors = predictions - y
+        
+        # Gradient update rule: theta := theta - alpha * (1/m) * X^T * errors
+        gradient = (1 / m) * (X.T @ errors)
+        current_theta = current_theta - alpha * gradient
+        
+        # Record training loss
+        train_loss_history.append(compute_loss(X, y, current_theta))
+        
+        # Record validation loss
+        if X_val is not None and y_val is not None:
+            validation_loss_history.append(compute_loss(X_val, y_val, current_theta))
+            
+    return current_theta, train_loss_history, validation_loss_history
+
+def gradient_descent_regularized(X, y, theta, alpha, iterations, lambda_, X_val, y_val):
+    """Performs regularized gradient descent (Ridge)."""
+    m = len(y)
+    train_loss_history = []
+    validation_loss_history = []
+    
+    current_theta = theta.copy()
+    
+    for i in range(iterations):
+        predictions = hypothesis(X, current_theta)
+        errors = predictions - y
+        
+        # Standard gradient
+        gradient = (1 / m) * (X.T @ errors)
+        
+        # L2 Regularization term gradient: (lambda/m) * theta (zero for bias term theta[0])
+        regularization_term = (lambda_ / m) * current_theta
+        regularization_term[0] = 0  # Do not regularize the bias term
+        
+        # Total gradient and update
+        total_gradient = gradient + regularization_term
+        current_theta = current_theta - alpha * total_gradient
+        
+        # Record training loss (WITH regularization penalty included in the loss function)
+        # NOTE: The problem statement suggests using the unregularized loss for evaluation,
+        # but plotting the training loss with the penalty is more common when training.
+        # Here we calculate the training loss WITH penalty for tracking optimization stability.
+        # J_reg = (1 / (2*m)) * sum(errors^2) + (lambda / (2*m)) * sum(theta[1:]^2)
+        
+        # Re-calculate unregularized MSE (for accurate comparison to validation loss)
+        unreg_train_loss = compute_loss(X, y, current_theta)
+        penalty = (lambda_ / (2 * m)) * np.sum(current_theta[1:]**2)
+        
+        train_loss_history.append(unreg_train_loss + penalty)
+        
+        # Record validation loss (ALWAYS UNREGULARIZED for evaluation)
+        validation_loss_history.append(compute_loss(X_val, y_val, current_theta))
+            
+    return current_theta, train_loss_history, validation_loss_history
+
+def plot_loss(train_history, val_history, title, alpha, iterations):
+    """Helper function to plot loss history."""
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(iterations), train_history, label='Training Loss')
+    plt.plot(range(iterations), val_history, label='Validation Loss')
+    plt.title(f'{title}\n(Alpha: {alpha}, Iterations: {iterations})')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss (MSE)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# --- Shared Hyperparameters ---
+ALPHA_BASE = 0.01
+ITERATIONS_BASE = 5000
+ALPHA_SCALED = 0.1
+ITERATIONS_SCALED = 1000
+LAMBDA_REG = 300
