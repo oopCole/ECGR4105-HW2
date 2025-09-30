@@ -1,0 +1,47 @@
+print("\n--- Problem 2.a Results (5 Features with Scaling) ---")
+
+# --- Standardization ---
+scaler_s_1a = StandardScaler()
+X_train_s_1a = scaler_s_1a.fit_transform(X_train_raw_1a)
+X_test_s_1a = scaler_s_1a.transform(X_test_raw_1a)
+
+X_train_s_1a = np.hstack((np.ones((X_train_s_1a.shape[0], 1)), X_train_s_1a))
+X_test_s_1a = np.hstack((np.ones((X_test_s_1a.shape[0], 1)), X_test_s_1a))
+initial_theta_s_1a = np.zeros(X_train_s_1a.shape[1])
+
+best_theta_s_1a, train_loss_hist_s_1a, val_loss_hist_s_1a = gradient_descent(
+    X_train_s_1a, y_train_1a, initial_theta_s_1a, ALPHA_SCALED, ITERATIONS_SCALED,
+    X_test_s_1a, y_test_1a
+)
+final_validation_loss_s_1a = compute_loss(X_test_s_1a, y_test_1a, best_theta_s_1a)
+print(f"Standardization Val Loss: {final_validation_loss_s_1a:.2f}")
+
+# --- Normalization ---
+scaler_n_1a = MinMaxScaler()
+X_train_n_1a = scaler_n_1a.fit_transform(X_train_raw_1a)
+X_test_n_1a = scaler_n_1a.transform(X_test_raw_1a)
+
+X_train_n_1a = np.hstack((np.ones((X_train_n_1a.shape[0], 1)), X_train_n_1a))
+X_test_n_1a = np.hstack((np.ones((X_test_n_1a.shape[0], 1)), X_test_n_1a))
+initial_theta_n_1a = np.zeros(X_train_n_1a.shape[1])
+
+best_theta_n_1a, train_loss_hist_n_1a, val_loss_hist_n_1a = gradient_descent(
+    X_train_n_1a, y_train_1a, initial_theta_n_1a, ALPHA_SCALED, ITERATIONS_SCALED,
+    X_test_n_1a, y_test_1a
+)
+final_validation_loss_n_1a = compute_loss(X_test_n_1a, y_test_1a, best_theta_n_1a)
+print(f"Normalization Val Loss: {final_validation_loss_n_1a:.2f}")
+print(f"Baseline Val Loss (1.a): {final_validation_loss_1a:.2f}")
+
+# Plotting Comparison
+plt.figure(figsize=(10, 6))
+plt.plot(range(ITERATIONS_SCALED), train_loss_hist_s_1a, label='Std Train Loss', linestyle='--')
+plt.plot(range(ITERATIONS_SCALED), val_loss_hist_s_1a, label='Std Validation Loss')
+plt.plot(range(ITERATIONS_SCALED), train_loss_hist_n_1a, label='Norm Train Loss', linestyle=':')
+plt.plot(range(ITERATIONS_SCALED), val_loss_hist_n_1a, label='Norm Validation Loss')
+plt.title(f'2.a) Loss History Comparison (5 Features, Scaled)')
+plt.xlabel('Iterations')
+plt.ylabel('Loss (MSE)')
+plt.legend()
+plt.grid(True)
+plt.show()
